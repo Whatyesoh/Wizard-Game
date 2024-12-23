@@ -6,7 +6,7 @@ currentCard = 1
 baseWidth = 63
 baseHeight = 88
 
-function Card:new (x, y, size, suit, value)
+function Card:new (x, y, size, suit, value, game)
     local card = {}
     setmetatable(card,{__index = self})
     card.x = screenWidth - sizeOfCards * baseWidth * 1.1
@@ -24,7 +24,11 @@ function Card:new (x, y, size, suit, value)
     card.player = nil
     card.inHand = false
     card.played = false
+    card.game = game or {}
     table.insert(allCards,card)
+    if (card.game.cards) then
+        table.insert(card.game.cards,card)
+    end
     return card
 end
 
@@ -89,7 +93,6 @@ function Card:calculateTarget(playerHandSize,position,playerNum)
                 return screenWidth - 7 * sizeOfCards * baseWidth/2, screenHeight/2 - sizeOfCards * baseHeight/2
             end
         end
-        
     end
 
     if (self.held == 1) then
@@ -283,20 +286,14 @@ end
 function releaseCards()
     for i,card in ipairs(allCards) do
         if (card.held) then
+            --release all cards
             card.held = 0
+
+            --if it can be played, then play it
             if (card.y < .55 * screenHeight and currentPlayer == mainPlayer and gameState == 2 and doneDealing == true) then
                 for j,newCard in ipairs(allPlayers[mainPlayer].hand) do
                     if (newCard.suit == card.suit and card.value == newCard.value) then
-                        card:playCard(mainPlayer)
-                        table.remove(allPlayers[mainPlayer].hand,j)
-                        currentPlayer = currentPlayer + 1
-                        if (currentPlayer > numPlayers) then
-                            currentPlayer = 1
-                        end
-                        if (currentPlayer == trickWinner) then
-                            evaluatePlayedCards()
-                            waitingForNewTrick = true
-                        end
+                        card:playCard(mainPlayer, j)
                     end
                 end
             end
@@ -305,13 +302,24 @@ function releaseCards()
     end
 end
 
-function Card:playCard(player)
+function Card:playCard(player, index)
     allPlayers[player].playedCard = self
     table.insert(playedCards,self)
     self.visibleSide = 1
     self.size = 1.5
     self.played = true
     self.inHand = false
+
+    table.remove(allPlayers[player].hand,index)
+    calculateTargets()
+    currentPlayer = currentPlayer + 1
+    if (currentPlayer > numPlayers) then
+        currentPlayer = 1
+    end
+    if (currentPlayer == trickWinner) then
+        evaluatePlayedCards()
+        waitingForNewTrick = true
+    end
 end
 
 function finishedDraw()

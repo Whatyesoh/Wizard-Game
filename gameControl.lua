@@ -5,11 +5,10 @@ trickWinner = 1
 waitingToStartTrick = false
 waitingForNewTrick = false
 doneDealing = false
-local connectedPlayers = 1
 recentInfo = ""
 
 function startGame()
-    love.math.random(1,numPlayers)
+    startingPlayer = love.math.random(1,numPlayers)
     roundNum = 0
     startRound()
 end
@@ -72,17 +71,7 @@ function controlUpdate(dt)
         if (gameState == 2) then
             if (currentPlayer ~= mainPlayer and waitingForNewTrick == false) then
                 local cardToPlay = love.math.random(1,#allPlayers[currentPlayer].hand)
-                allPlayers[currentPlayer].hand[cardToPlay]:playCard(currentPlayer)
-                table.remove(allPlayers[currentPlayer].hand,cardToPlay)
-                calculateTargets()
-                currentPlayer = currentPlayer + 1
-                if (currentPlayer > numPlayers) then
-                    currentPlayer = 1
-                end
-                if (currentPlayer == trickWinner) then
-                    evaluatePlayedCards()
-                    waitingForNewTrick = true
-                end
+                allPlayers[currentPlayer].hand[cardToPlay]:playCard(currentPlayer,cardToPlay)
             end
         end
     end
@@ -111,7 +100,7 @@ function evaluatePlayedCards()
     for i,card in ipairs(playedCards) do
         if (winningCard[1] == "14") then
             goto continue
-        elseif (winningCard[1] == "0") then
+        elseif (winningCard[1] == "0" and card.value ~= "0") then
             winningCard = {card.value,card.suit,card.player}
         elseif (card.value == "14") then
             winningCard = {card.value,card.suit,card.player}
@@ -121,7 +110,7 @@ function evaluatePlayedCards()
             if (winningCard[2] ~= trump or tonumber(card.value) > tonumber(winningCard[1])) then
                 winningCard = {card.value,card.suit,card.player}
             end
-        elseif (card.suit == playedCards[1].suit) then
+        elseif (card.suit == playedCards[1].suit and winningCard[2] ~= trump) then
             if (tonumber(card.value) > tonumber(winningCard[1])) then
                 winningCard = {card.value,card.suit,card.player}
             end
