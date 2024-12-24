@@ -110,13 +110,60 @@ function createWizard()
                 gameActionGame.cardsDealt = gameActionGame.cardsDealt + 1
             end
             if (gameActionGame.cardsDealt == gameActionGame.cardsToDeal) then
-                finishedDraw()
+                if (currentCard <= #allCards) then
+                    allCards[currentCard].visibleSide = 1
+                end
+                game.playCards.start = true
+                game.makeBet.start = true
                 doneDealing = true
+                return
             end
+            gameActionGame.dealCards.start = true
         end,
         check = 
         function (gameActionGame)
             return gameActionGame.cardsDealt < gameActionGame.cardsToDeal
+        end
+    })
+
+    game.playCards = GameAction:new({
+        game = game,
+        waitTime = .2,
+        execute = 
+        function (gameActionGame)
+            local cardToPlay = love.math.random(1,#allPlayers[currentPlayer].hand)
+            allPlayers[currentPlayer].hand[cardToPlay]:playCard(currentPlayer,cardToPlay)
+            if (waitingForNewTrick == false) then
+                gameActionGame.playCards.start = true
+            end
+        end,
+        check = 
+        function (gameActionGame)
+            return (gameState == 2 and currentPlayer ~= mainPlayer and waitingForNewTrick == false)
+        end
+    })
+
+    
+    game.makeBet = GameAction:new({
+        game = game,
+        waitTime = .2,
+        execute = 
+        function (gameActionGame)
+            makeBet(currentPlayer)
+            currentPlayer = currentPlayer + 1
+            if (currentPlayer > numPlayers) then
+                currentPlayer = 1
+            end
+            if (currentPlayer == startingPlayer) then
+                gameState = 2
+            end
+            if (gameState == 1) then
+                gameActionGame.makeBet.start = true
+            end
+        end,
+        check = 
+        function (gameActionGame)
+            return (gameState == 1 and currentPlayer ~= mainPlayer)
         end
     })
 
@@ -128,6 +175,7 @@ function updateWizard(dt,game)
     for i,gameAction in ipairs(game.gameActions) do
         gameAction:update(dt,game)
     end
+    moveCards(dt,game)
 end
 
 function wizardMousePress(x, y, buttonPressed, game)

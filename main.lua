@@ -85,12 +85,8 @@ function love.update(dt)
         gameState = 1
     end
 
-    controlUpdate(dt)
-
     wizardGame.update(dt,wizardGame)
 
-
-    moveCards(dt)
     checkMouseHover()
     reorder()
     drawCanvas()

@@ -31,7 +31,7 @@ function startRound()
     wizardGame.cardsDealt = 0
     doneDealing = false
 
-    wizardGame.dealCards.wait = 1
+    wizardGame.dealCards.wait = .3
     wizardGame.dealCards.start = true
     wizardGame.playerBeingDealt = startingPlayer
 
@@ -42,32 +42,6 @@ function startRound()
 
 
 
-end
-
-function controlUpdate(dt)
-    updateTime = updateTime + dt
-    if (updateTime > .4) then
-        updateTime = 0
-        if (gameState == 1) then
-            if (currentPlayer ~= mainPlayer) then
-                makeBet(currentPlayer)
-                currentPlayer = currentPlayer + 1
-                if (currentPlayer > numPlayers) then
-                    currentPlayer = 1
-                end
-                if (currentPlayer == startingPlayer) then
-                    gameState = 2
-                end
-            end     
-        end
-
-        if (gameState == 2) then
-            if (currentPlayer ~= mainPlayer and waitingForNewTrick == false) then
-                local cardToPlay = love.math.random(1,#allPlayers[currentPlayer].hand)
-                allPlayers[currentPlayer].hand[cardToPlay]:playCard(currentPlayer,cardToPlay)
-            end
-        end
-    end
 end
 
 function progressGame()
@@ -121,6 +95,9 @@ function prepareForNewTrick ()
     if (#allPlayers[mainPlayer].hand == 0) then
         endRound()
         startRound() 
+    else
+        wizardGame.playCards.start = true
+        wizardGame.makeBet.start = true
     end
 end
 
@@ -135,8 +112,5 @@ function endRound()
 end
 
 function makeBet(player)
-    --[[
-    HANDLE ONLINE GAME STUFF HERE
-    ]]
     allPlayers[player].bet = love.math.random(0,roundNum)
 end

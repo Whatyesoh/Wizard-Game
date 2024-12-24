@@ -35,8 +35,8 @@ function Card:setVisibility(vis,side)
     self.visibleSide = side
 end
 
-function moveCards(dt)
-    for i,card in ipairs(allCards) do
+function moveCards(dt,game)
+    for i,card in ipairs(game.cards) do
         local mag = math.sqrt((card.x-card.targetX)*(card.x-card.targetX)+(card.y-card.targetY)*(card.y-card.targetY))
         if (math.abs(card.x - card.targetX) < 1) then
             card.x = card.targetX
@@ -269,12 +269,6 @@ function Card:playCard(player, index)
     if (currentPlayer == trickWinner) then
         evaluatePlayedCards()
         waitingForNewTrick = true
-    end
-end
-
-function finishedDraw()
-    if (currentCard <= #allCards) then
-        allCards[currentCard].visibleSide = 1
     end
 end
 

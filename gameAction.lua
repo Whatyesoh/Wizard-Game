@@ -37,6 +37,7 @@ function GameAction:update(dt, game)
         if (self.start) then
             if (self.check(game)) then
                 self.timer = self.waitTime
+                self.start = false
             end
         end
         return
