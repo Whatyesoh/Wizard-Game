@@ -10,6 +10,7 @@ require "players"
 require "gameControl"
 require "game"
 require "wizard"
+require "gameAction"
 
 io.stdout:setvbuf("no")
 
@@ -31,10 +32,14 @@ function love.load()
 
     screenWidth,screenHeight = love.graphics.getWidth(), love.graphics.getHeight()
 
+    print(screenWidth,screenHeight)
+
     shadowShader = love.graphics.newShader("shadowShader.frag")
     canvas = love.graphics.newCanvas()
 
-    sizeOfCards = 2 * (screenWidth/1500)
+    widthScaling = (screenWidth/1536)
+
+    sizeOfCards = 2 * widthScaling
 
     setupScreen()
 
@@ -44,10 +49,12 @@ function love.load()
     
     wizardGame = createWizard()
 
+    startGame()
+
     love.math.random(200)
     love.math.random(60)
 
-    smallerFont = love.graphics.newFont("assets/Qager-zrlmw.ttf",30*(screenWidth/1500))
+    smallerFont = love.graphics.newFont("assets/Qager-zrlmw.ttf",30*widthScaling)
     
 end
 

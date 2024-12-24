@@ -2,7 +2,7 @@ allPlayers = {}
 Player = {}
 mainPlayer = 1
 
-function Player:new ()
+function Player:new (game)
     local player = {}
     setmetatable(player,{__index = self})
 
@@ -13,6 +13,7 @@ function Player:new ()
     player.score = 0
     player.name = ""
 
+    table.insert(game.players,player)
     table.insert(allPlayers,player)
     return player
 end

@@ -14,6 +14,8 @@ function Game:new (arguments)
     game.usesCards = arguments.usesCards or true
     game.cardSize = arguments.cardSize or 1
     game.active = false
+    game.players = {}
+    game.gameActions = {}
 
     game.update = arguments.update or emptyUpdate
     game.mousePress = arguments.mousePress or emptyMousePress

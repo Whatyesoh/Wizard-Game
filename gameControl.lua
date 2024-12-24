@@ -1,5 +1,3 @@
-cardsToDeal = 0
-cardsDealt = 0
 updateTime = 0
 trickWinner = 1
 waitingToStartTrick = false
@@ -29,14 +27,20 @@ function startRound()
 
     shuffleDeck()
 
-    cardsToDeal = roundNum
-    cardsDealt = 0
+    wizardGame.cardsToDeal = roundNum
+    wizardGame.cardsDealt = 0
     doneDealing = false
+
+    wizardGame.dealCards.wait = 1
+    wizardGame.dealCards.start = true
+    wizardGame.playerBeingDealt = startingPlayer
 
     for i,player in ipairs(allPlayers) do
         player.bet = "-"
         player.tricks = 0
     end
+
+
 
 end
 
@@ -44,17 +48,6 @@ function controlUpdate(dt)
     updateTime = updateTime + dt
     if (updateTime > .4) then
         updateTime = 0
-        if (cardsDealt < cardsToDeal) then
-            for i,player in ipairs(allPlayers) do
-                drawCards(player.hand,1,i)
-            end
-            cardsDealt = cardsDealt + 1
-            if (cardsDealt == cardsToDeal) then
-                finishedDraw()
-                doneDealing = true
-            end
-        end
-
         if (gameState == 1) then
             if (currentPlayer ~= mainPlayer) then
                 makeBet(currentPlayer)

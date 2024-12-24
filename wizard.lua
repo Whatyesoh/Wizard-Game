@@ -1,8 +1,3 @@
-humanIcon = nil
-dwarveIcon = nil
-elfIcon = nil
-blankCard = nil
-
 function createWizard()
     local game = Game:new({
         name = "wizard", 
@@ -46,6 +41,11 @@ function createWizard()
     
     game.deckLocs = {{screenWidth-game.cardSize*baseWidth,screenHeight-game.cardSize*baseHeight}}
 
+    for i,card in ipairs(game.cards) do
+        card.x = game.deckLocs[1][1]
+        card.y = game.deckLocs[1][2]
+    end
+
     game.playedLocs = {
         {screenWidth/2 - game.cardSize * baseWidth/2, screenHeight - 2.5 * game.cardSize * baseHeight},
         {6 * game.cardSize * baseWidth/2, screenHeight/2 - game.cardSize * baseHeight/2},
@@ -54,11 +54,11 @@ function createWizard()
     }
 
     local buttonsPerRow = 7
-    local buttonSpacing = 4
+    local buttonSpacing = 4 * widthScaling
 
 
     for i = 0,20 do
-        local newButton = Button:new(((i%buttonsPerRow)*buttonSpacing*20+20),20+buttonSpacing*20*math.floor(i/buttonsPerRow),60,60,
+        local newButton = Button:new(((i%buttonsPerRow)*buttonSpacing*20+20),20+buttonSpacing*20*math.floor(i/buttonsPerRow),60*widthScaling,60*widthScaling,
         
         function ()
             if (gameState == 1 and i <= roundNum) then
@@ -90,16 +90,44 @@ function createWizard()
     local newPlayer
 
     for i = 1,numPlayers do
-        newPlayer = Player:new()
+        newPlayer = Player:new(game)
     end
 
-    startGame()
+    game.cardsToDeal = 0
+    game.cardsDealt = 0
+
+    game.dealCards = GameAction:new({
+        game = game,
+        waitTime = .2,
+        execute = 
+        function (gameActionGame)
+            drawCards(gameActionGame.players[gameActionGame.playerBeingDealt].hand,1,gameActionGame.playerBeingDealt)
+            gameActionGame.playerBeingDealt = gameActionGame.playerBeingDealt + 1
+            if (gameActionGame.playerBeingDealt > numPlayers) then
+                gameActionGame.playerBeingDealt = 1
+            end
+            if (gameActionGame.playerBeingDealt == startingPlayer) then
+                gameActionGame.cardsDealt = gameActionGame.cardsDealt + 1
+            end
+            if (gameActionGame.cardsDealt == gameActionGame.cardsToDeal) then
+                finishedDraw()
+                doneDealing = true
+            end
+        end,
+        check = 
+        function (gameActionGame)
+            return gameActionGame.cardsDealt < gameActionGame.cardsToDeal
+        end
+    })
 
     return game
 end
 
 function updateWizard(dt,game)
     game:checkButtons()
+    for i,gameAction in ipairs(game.gameActions) do
+        gameAction:update(dt,game)
+    end
 end
 
 function wizardMousePress(x, y, buttonPressed, game)

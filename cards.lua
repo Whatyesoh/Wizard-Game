@@ -7,11 +7,11 @@ currentCard = 1
 function Card:new (x, y, size, suit, value, game)
     local card = {}
     setmetatable(card,{__index = self})
-    card.x = screenWidth - sizeOfCards * baseWidth * 1.1
-    card.y = screenHeight - sizeOfCards * baseHeight * 1.1
+    card.x = 0
+    card.y = 0
     card.targetX = x
     card.targetY = y
-    card.speed = 10
+    card.speed = 15 * widthScaling
     card.suit = suit
     card.value = value
     card.size = size
@@ -37,9 +37,25 @@ end
 
 function moveCards(dt)
     for i,card in ipairs(allCards) do
-        card.x = card.x + card.speed * dt* (card.targetX - card.x)
-        card.y = card.y + card.speed * dt* (card.targetY - card.y)
+        local mag = math.sqrt((card.x-card.targetX)*(card.x-card.targetX)+(card.y-card.targetY)*(card.y-card.targetY))
+        if (math.abs(card.x - card.targetX) < 1) then
+            card.x = card.targetX
+        else
+            card.x = card.x + card.speed * dt * math.abs(card.targetX - card.x)*(card.targetX - card.x) / mag
+        end
+        if (math.abs(card.y - card.targetY) < 1) then
+            card.y = card.targetY
+        else
+            card.y = card.y + card.speed * dt * math.abs(card.targetY - card.y)*(card.targetY - card.y) / mag
+        end
     end
+end
+
+function sign(x)
+    if (x == 0) then
+        return 0
+    end
+    return x/math.abs(x)
 end
 
 function shuffleDeck()
@@ -240,7 +256,7 @@ function Card:playCard(player, index)
     allPlayers[player].playedCard = self
     table.insert(playedCards,self)
     self.visibleSide = 1
-    self.size = 1.5
+    self.size = 1.5 * (screenWidth/1536)
     self.played = true
     self.inHand = false
 
@@ -290,8 +306,4 @@ function drawCards(hand,num,player)
         currentCard = currentCard + 1
     end
     calculateTargets()
-end
-
-function Card:sayHi()
-    print(self.x)
 end
