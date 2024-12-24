@@ -1,23 +1,24 @@
 Game = {}
 
-function Game:new (name, cards, handLocs, playedLocs, players, buttons, usesCards, cardSize, update, mousePress, mouseRelease, draw)
+function Game:new (arguments)
     local game = {}
     setmetatable(game,{__index = self})
     
-    game.name = name
-    game.cards = cards or {}
-    game.handLocs = handLocs or {}
-    game.playedLocs = playedLocs or {}
-    game.players = players or {}
-    game.buttons = buttons or {}
-    game.usesCards = usesCards or true
-    game.cardSize = cardSize or 1
+    game.name = arguments.name
+    game.cards = arguments.cards or {}
+    game.handLocs = arguments.handLocs or {}
+    game.playedLocs = arguments.playedLocs or {}
+    game.deckLocs = arguments.deckLocs or {}
+    game.players = arguments.players or {}
+    game.buttons = arguments.buttons or {}
+    game.usesCards = arguments.usesCards or true
+    game.cardSize = arguments.cardSize or 1
     game.active = false
 
-    game.update = update or emptyUpdate
-    game.mousePress = mousePress or emptyMousePress
-    game.mouseRelease = mouseRelease or emptyMouseRelease
-    game.draw = draw or emptyDraw
+    game.update = arguments.update or emptyUpdate
+    game.mousePress = arguments.mousePress or emptyMousePress
+    game.mouseRelease = arguments.mouseRelease or emptyMouseRelease
+    game.draw = arguments.draw or emptyDraw
 
     return game
 end

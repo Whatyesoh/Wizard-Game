@@ -34,20 +34,20 @@ function love.load()
     shadowShader = love.graphics.newShader("shadowShader.frag")
     canvas = love.graphics.newCanvas()
 
+    sizeOfCards = 2 * (screenWidth/1500)
+
     setupScreen()
 
     spacing = 200
 
-    sizeOfCards = 2
-
-    wizardGame = {}
     
-    wizardGame = createWizard(wizardGame)
+    
+    wizardGame = createWizard()
 
     love.math.random(200)
     love.math.random(60)
 
-    smallerFont = love.graphics.newFont("assets/Qager-zrlmw.ttf",30)
+    smallerFont = love.graphics.newFont("assets/Qager-zrlmw.ttf",30*(screenWidth/1500))
     
 end
 
@@ -101,7 +101,6 @@ end
 
 function love.mousereleased(x,y,button)
     wizardGame.mouseRelease(x,y,button,wizardGame)
-    releaseCards()
 end
 
 function love.draw()

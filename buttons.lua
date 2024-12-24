@@ -73,6 +73,6 @@ function genericButtonDraw(button)
         local sizeW = pixelFontBig:getWidth(tostring(button.text))
         local sizeH = pixelFontBig:getHeight()
         local newX, newY, newWidth, newHeight = adjustTransform(0,0,button.width,button.height)
-        perfectPrint(button.text,button.x + (newWidth - sizeW)/2,button.y+(newHeight-sizeH*.9))
+        perfectPrint(button.text,button.x + (newWidth - sizeW)/2,button.y+(newHeight-sizeH)/2+.1*sizeH)
     end
 end

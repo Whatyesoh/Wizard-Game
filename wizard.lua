@@ -3,9 +3,27 @@ dwarveIcon = nil
 elfIcon = nil
 blankCard = nil
 
-function createWizard(game)
-    game = Game:new("wizard", {},{},{},{},{},true,sizeOfCards,updateWizard,wizardMousePress,wizardMouseRelease,drawWizard)
+function createWizard()
+    local game = Game:new({
+        name = "wizard", 
+        cardSize = sizeOfCards,
+        update = updateWizard,
+        mousePress = wizardMousePress,
+        mouseRelease = wizardMouseRelease,
+        draw = drawWizard
+    })
+    
     game.active = true
+
+
+    humanIcon = love.graphics.newImage("assets/humanIcon.png")
+    dwarveIcon = love.graphics.newImage("assets/dwarveIcon.png")
+    giantIcon = love.graphics.newImage("assets/giantIcon.png")
+    elfIcon = love.graphics.newImage("assets/elfIcon.png")
+    blankCard = love.graphics.newImage("assets/blankCard.png")
+
+    baseWidth = blankCard:getWidth()
+    baseHeight = blankCard:getHeight()
 
     local newCard
 
@@ -16,11 +34,24 @@ function createWizard(game)
         newCard = Card:new(0,0,sizeOfCards,"h",tostring(i),game)
     end
 
-    humanIcon = love.graphics.newImage("assets/humanIcon.png")
-    dwarveIcon = love.graphics.newImage("assets/dwarveIcon.png")
-    giantIcon = love.graphics.newImage("assets/giantIcon.png")
-    elfIcon = love.graphics.newImage("assets/elfIcon.png")
-    blankCard = love.graphics.newImage("assets/blankCard.png")
+    local cardHeight = baseHeight * newCard.size
+    local cardWidth = baseWidth * newCard.size
+
+    game.handLocs = {
+        {screenHeight - cardHeight*1.1,false},
+        {cardWidth * .1,true},
+        {cardHeight * .1,false},
+        {screenWidth - cardWidth*1.1,true}
+    }
+    
+    game.deckLocs = {{screenWidth-game.cardSize*baseWidth,screenHeight-game.cardSize*baseHeight}}
+
+    game.playedLocs = {
+        {screenWidth/2 - game.cardSize * baseWidth/2, screenHeight - 2.5 * game.cardSize * baseHeight},
+        {6 * game.cardSize * baseWidth/2, screenHeight/2 - game.cardSize * baseHeight/2},
+        {screenWidth/2 - game.cardSize * baseWidth/2, 1.5 * game.cardSize * baseHeight},
+        {screenWidth - 7 * game.cardSize * baseWidth/2, screenHeight/2 - game.cardSize * baseHeight/2}
+    }
 
     local buttonsPerRow = 7
     local buttonSpacing = 4
@@ -80,6 +111,23 @@ end
 function wizardMouseRelease(x, y, buttonPressed, game)
     for i, button in ipairs(game.buttons) do
         button:checkMouseRelease(x,y,buttonPressed)
+    end
+
+    for i,card in ipairs(allCards) do
+        if (card.held) then
+            --release all cards
+            card.held = 0
+
+            --if it can be played, then play it
+            if (card.y < .55 * screenHeight and currentPlayer == mainPlayer and gameState == 2 and doneDealing == true) then
+                for j,newCard in ipairs(allPlayers[mainPlayer].hand) do
+                    if (newCard.suit == card.suit and card.value == newCard.value) then
+                        card:playCard(mainPlayer, j)
+                    end
+                end
+            end
+        end
+        card.held = 0
     end
 end
 

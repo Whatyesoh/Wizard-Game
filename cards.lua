@@ -3,8 +3,6 @@ Card = {}
 playedCards = {}
 previouslyPlayedCards = {}
 currentCard = 1
-baseWidth = 63
-baseHeight = 88
 
 function Card:new (x, y, size, suit, value, game)
     local card = {}
@@ -68,38 +66,19 @@ end
 
 function Card:calculateTarget(playerHandSize,position,playerNum)
     local maxCards = 60 / #allPlayers
-    local cardW = sizeOfCards * baseWidth
-    local cardH = sizeOfCards * baseHeight
+    local cardW = self.size * baseWidth
+    local cardH = self.size * baseHeight
 
     if (self.played) then
-        if (self.player == mainPlayer) then
-            return screenWidth/2 - sizeOfCards * baseWidth/2, screenHeight - 2.5 * sizeOfCards * baseHeight
-        elseif ((self.player - mainPlayer) % 2 == 0) then
-            return screenWidth/2 - sizeOfCards * baseWidth/2, 1.5 * sizeOfCards * baseHeight
-        else
-            local numPlayer = self.player
-            if (mainPlayer == 3) then
-                if (numPlayer == 2) then
-                    numPlayer = 4
-                elseif (numPlayer == 4) then
-                    numPlayer = 2
-                end                
-            end
-            if ((mainPlayer+1)%#allPlayers == numPlayer and mainPlayer ~= 3) then
-                return 6 * sizeOfCards * baseWidth/2, screenHeight/2 - sizeOfCards * baseHeight/2
-            elseif ((mainPlayer-1)%#allPlayers == numPlayer and mainPlayer == 3) then
-                return 6 * sizeOfCards * baseWidth/2, screenHeight/2 - sizeOfCards * baseHeight/2
-            else
-                return screenWidth - 7 * sizeOfCards * baseWidth/2, screenHeight/2 - sizeOfCards * baseHeight/2
-            end
-        end
+        return self.game.playedLocs[self.player][1],self.game.playedLocs[self.player][2]
     end
 
     if (self.held == 1) then
         local x,y = love.mouse.getPosition()
         x,y = pixelAdjusted(x,y)
-        return x - sizeOfCards * baseWidth/2,y - (sizeOfCards * baseHeight)/2
+        return x - self.size * baseWidth/2,y - (self.size * baseHeight)/2
     end
+
     local checkHover = 0
 
     if (self.hovered == 1) then
@@ -107,54 +86,28 @@ function Card:calculateTarget(playerHandSize,position,playerNum)
     end
 
     if (self.inHand == false and self.played == false) then
-        return screenWidth-sizeOfCards*baseWidth,screenHeight-sizeOfCards*baseHeight
+        return self.game.deckLocs[1][1],self.game.deckLocs[1][2]
     end
 
-    local newX, newY
-    local vertical = false
     local maxHoriz = 9 * cardW
     local maxVert = 2 * cardH
     local minHoriz = 1.5 * cardW
     local minVert = 2 * cardH
-    if (playerNum == mainPlayer) then
-        newY = screenHeight - cardH*1.1
-        vertical = false
-    else
-        newY = cardH*.1
+
+    if (playerNum ~= mainPlayer) then
         if ((playerNum-mainPlayer)%2 == 0) then
-            vertical = false
             minHoriz = 1 * cardW
             maxHoriz = 5 * cardW
-        else
-            if (mainPlayer == 3) then
-                if (playerNum == 2) then
-                    playerNum = 4
-                elseif (playerNum == 4) then
-                    playerNum = 2
-                end                
-            end
-            playerNum = playerNum + 1
-            if (mainPlayer == 3) then
-                playerNum = playerNum - 2
-            end
-            if (playerNum > numPlayers) then
-                playerNum = 1
-            end
-            if (mainPlayer ~= playerNum) then
-                newX = cardW * .1
-            else
-                newX = screenWidth - cardW*1.1
-            end
-            vertical = true
         end
     end
+    
     local horizBound = minHoriz * (1-math.pow((playerHandSize/maxCards),.5)) + maxHoriz * math.pow(playerHandSize/maxCards,.5)
     local vertBound = minVert * (1-(maxCards / playerHandSize)) + maxVert * (maxCards/playerHandSize)
 
-    if (vertical == false) then
-        return ((screenWidth - horizBound)/2) + (position*((horizBound)/(playerHandSize))) - cardW/2, newY - checkHover
+    if (self.game.handLocs[playerNum][2] == false) then
+        return ((screenWidth - horizBound)/2) + (position*((horizBound)/(playerHandSize))) - cardW/2, self.game.handLocs[playerNum][1] - checkHover
     else
-        return newX, ((screenHeight - vertBound)/2) + (position*((vertBound)/(playerHandSize))) - cardH/2 - checkHover
+        return self.game.handLocs[playerNum][1], ((screenHeight - vertBound)/2) + (position*((vertBound)/(playerHandSize))) - cardH/2 - checkHover
     end
 end
 
@@ -280,25 +233,6 @@ function checkCardHeld(x,y,button)
                 card.held = 0
             end
         end
-    end
-end
-
-function releaseCards()
-    for i,card in ipairs(allCards) do
-        if (card.held) then
-            --release all cards
-            card.held = 0
-
-            --if it can be played, then play it
-            if (card.y < .55 * screenHeight and currentPlayer == mainPlayer and gameState == 2 and doneDealing == true) then
-                for j,newCard in ipairs(allPlayers[mainPlayer].hand) do
-                    if (newCard.suit == card.suit and card.value == newCard.value) then
-                        card:playCard(mainPlayer, j)
-                    end
-                end
-            end
-        end
-        card.held = 0
     end
 end
 
